@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Agile Requirement Prioritisation Tool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --primary: #1f3c88;
+      --accent: #3f8efc;
+      --bg: #f5f7fb;
+      --card-bg: #ffffff;
+      --border: #dde2f0;
+      --text-muted: #666;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      background: var(--bg);
+      color: #222;
+      line-height: 1.6;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+
+    header p {
+      margin: 0.4rem 0 0;
+      opacity: 0.9;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: -2rem auto 3rem auto;
+      padding: 0 1rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+      border: 1px solid #e3e6f3;
+    }
+
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.25rem;
+      color: var(--primary);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.4rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .intro {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      background: #e6f0ff;
+      color: var(--primary);
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .controls input[type="text"] {
+      flex: 1;
+      min-width: 220px;
+      padding: 0.5rem 0.7rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 0.5rem 1.1rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      box-shadow: 0 4px 10px rgba(63, 142, 252, 0.3);
+      transition: transform 0.05s ease, box-shadow 0.05s ease, background 0.1s ease;
+    }
+
+    button.secondary {
+      background: #eef1fb;
+      color: var(--primary);
+      box-shadow: none;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(63, 142, 252, 0.35);
+    }
+
+    button.secondary:hover {
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--border);
+      padding: 0.4rem 0.4rem;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #f0f3ff;
+      font-weight: 600;
+      color: var(--primary);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #fafbff;
+    }
+
+    tbody tr.highlight {
+      background: #e7f8e7 !important;
+    }
+
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 0.25rem 0.3rem;
+      border-radius: 6px;
+      border: 1px solid #d3d8ea;
+      font-size: 0.85rem;
+    }
+
+    .score {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .helper-text {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+    }
+
+    .results-note {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 1.4rem;
+      }
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      button {
+        width: 100%;
+        justify-content: center;
+      }
+      th, td {
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Agile Requirement Prioritisation Tool</h1>
+  <p>Supports your research: “Enhancing Requirement Prioritisation through User Involvement in Agile Projects”</p>
+</header>
+
+<main>
+  <section class="card">
+    <h2>About This Tool</h2>
+    <p class="intro">
+      This prototype demonstrates how <strong>user involvement</strong> can be used to
+      <strong>prioritise requirements</strong> in Agile projects. Stakeholders rate each requirement
+      based on importance, value, effort, and MoSCoW classification. The tool calculates a
+      <strong>priority score</strong> and sorts the backlog accordingly.
+    </p>
+    <div class="meta">
+      <span class="tag">User Involvement</span>
+      <span class="tag">Requirement Prioritisation</span>
+      <span class="tag">Agile Projects</span>
+      <span class="tag">Project Performance</span>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Backlog & User Ratings</h2>
+
+    <div class="controls">
+      <input type="text" id="newRequirement" placeholder="New requirement / user story (e.g. As a user, I want to reset my password...)" />
+      <button id="addRequirementBtn">+ Add Requirement</button>
+      <button class="secondary" id="resetBtn">Reset to Sample Data</button>
+    </div>
+    <p class="helper-text">
+      For each requirement, the user/stakeholder provides ratings. Then click
+      <strong>“Calculate &amp; Sort Priorities”</strong> to see the recommended order.
+    </p>
+
+    <div style="max-height: 380px; overflow:auto; margin-top:0.8rem;">
+      <table id="reqTable">
+        <thead>
+        <tr>
+          <th style="width: 30%;">Requirement</th>
+          <th style="width: 10%;">Importance<br>(1–5)</th>
+          <th style="width: 10%;">Value<br>(1–5)</th>
+          <th style="width: 10%;">Effort<br>(1–5)</th>
+          <th style="width: 14%;">MoSCoW</th>
+          <th style="width: 10%;">Score</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Rows will be populated by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:1rem; display:flex; flex-wrap:wrap; gap:0.5rem;">
+      <button id="calcBtn">⚙️ Calculate &amp; Sort Priorities</button>
+    </div>
+
+    <p class="results-note" id="resultsNote">
+      Tip: Use this page in your research demo to show how user input changes the prioritisation order.
+    </p>
+  </section>
+</main>
+
+<script>
+  // Sample requirements to demonstrate the tool
+  const sampleRequirements = [
+    "As a customer, I want to view my order history so that I can track past purchases.",
+    "As a user, I want to reset my password so that I can regain access if I forget it.",
+    "As a product owner, I want a dashboard of key metrics so that I can monitor project performance.",
+    "As a user, I want to receive email notifications for important updates.",
+    "As an admin, I want to manage user roles so that I can control access levels."
+  ];
+
+  const moscowWeights = {
+    "Must": 3,
+    "Should": 2,
+    "Could": 1,
+    "Wont": 0
+  };
+
+  const tableBody = document.querySelector("#reqTable tbody");
+  const addRequirementBtn = document.getElementById("addRequirementBtn");
+  const newRequirementInput = document.getElementById("newRequirement");
+  const calcBtn = document.getElementById("calcBtn");
+  const resetBtn = document.getElementById("resetBtn");
+  const resultsNote = document.getElementById("resultsNote");
+
+  function createRow(requirementText) {
+    const tr = document.createElement("tr");
+
+    // Requirement text
+    const tdReq = document.createElement("td");
+    const textarea = document.createElement("textarea");
+    textarea.value = requirementText;
+    textarea.style.width = "100%";
+    textarea.style.minHeight = "48px";
+    textarea.style.borderRadius = "6px";
+    textarea.style.border = "1px solid #d3d8ea";
+    textarea.style.fontSize = "0.85rem";
+    tdReq.appendChild(textarea);
+
+    // Importance
+    const tdImp = document.createElement("td");
+    const inpImp = document.createElement("input");
+    inpImp.type = "number";
+    inpImp.min = "1";
+    inpImp.max = "5";
+    inpImp.value = "4";
+    tdImp.appendChild(inpImp);
+
+    // Value
+    const tdVal = document.createElement("td");
+    const inpVal = document.createElement("input");
+    inpVal.type = "number";
+    inpVal.min = "1";
+    inpVal.max = "5";
+    inpVal.value = "4";
+    tdVal.appendChild(inpVal);
+
+    // Effort
+    const tdEff = document.createElement("td");
+    const inpEff = document.createElement("input");
+    inpEff.type = "number";
+    inpEff.min = "1";
+    inpEff.max = "5";
+    inpEff.value = "3";
+    tdEff.appendChild(inpEff);
+
+    // MoSCoW
+    const tdMos = document.createElement("td");
+    const select = document.createElement("select");
+    ["Must", "Should", "Could", "Wont"].forEach(val => {
+      const opt = document.createElement("option");
+      opt.value = val;
+      opt.textContent = val === "Wont" ? "Won't" : val;
+      if (val === "Must") opt.selected = true;
+      select.appendChild(opt);
+    });
+    tdMos.appendChild(select);
+
+    // Score
+    const tdScore = document.createElement("td");
+    tdScore.className = "score";
+    tdScore.textContent = "-";
+
+    tr.appendChild(tdReq);
+    tr.appendChild(tdImp);
+    tr.appendChild(tdVal);
+    tr.appendChild(tdEff);
+    tr.appendChild(tdMos);
+    tr.appendChild(tdScore);
+
+    return tr;
+  }
+
+  function populateSampleData() {
+    tableBody.innerHTML = "";
+    sampleRequirements.forEach(req => {
+      tableBody.appendChild(createRow(req));
+    });
+    resultsNote.textContent =
+      "Sample requirements loaded. Adjust ratings, then click “Calculate & Sort Priorities”.";
+  }
+
+  function calculateAndSort() {
+    const rows = Array.from(tableBody.querySelectorAll("tr"));
+
+    rows.forEach(row => {
+      row.classList.remove("highlight");
+      const inputs = row.querySelectorAll("input[type='number']");
+      const imp = parseFloat(inputs[0].value) || 0;
+      const val = parseFloat(inputs[1].value) || 0;
+      const eff = parseFloat(inputs[2].value) || 0;
+      const mosSel = row.querySelector("select").value;
+      const mosWeight = moscowWeights[mosSel] || 0;
+
+      // Simple scoring formula: importance & value positive, effort negative, MoSCoW weight positive
+      const score = (0.35 * imp) + (0.35 * val) + (0.2 * mosWeight) - (0.1 * eff);
+
+      row.dataset.score = score.toFixed(3);
+      row.querySelector(".score").textContent = score.toFixed(2);
+    });
+
+    // Sort by score descending
+    rows.sort((a, b) => parseFloat(b.dataset.score || 0) - parseFloat(a.dataset.score || 0));
+
+    // Re-append in new order
+    rows.forEach((row, index) => {
+      tableBody.appendChild(row);
+      // Highlight top 3
+      if (index < 3) {
+        row.classList.add("highlight");
+      }
+    });
+
+    resultsNote.textContent =
+      "Backlog sorted by computed priority score. Top 3 items are highlighted as recommended for next sprint.";
+  }
+
+  addRequirementBtn.addEventListener("click", () => {
+    const text = newRequirementInput.value.trim();
+    if (!text) {
+      alert("Please enter a requirement description first.");
+      return;
+    }
+    tableBody.appendChild(createRow(text));
+    newRequirementInput.value = "";
+    resultsNote.textContent = "New requirement added. Don’t forget to recalculate priorities.";
+  });
+
+  calcBtn.addEventListener("click", calculateAndSort);
+  resetBtn.addEventListener("click", populateSampleData);
+
+  // Initial load
+  populateSampleData();
+</script>
+</body>
+</html>
