@@ -233,6 +233,10 @@
 
   <section class="card">
     <h2>Backlog & User Ratings</h2>
+    <button id="helpBtn" class="secondary" style="margin-bottom:0.75rem;">
+      ❓ What do these fields mean?
+    </button>
+
 
     <div class="controls">
       <input type="text" id="newRequirement" placeholder="New requirement / user story (e.g. As a user, I want to reset my password...)" />
@@ -298,6 +302,8 @@
   const resetBtn = document.getElementById("resetBtn");
   const resultsNote = document.getElementById("resultsNote");
   const viewOutcomeBtn = document.getElementById("viewOutcomeBtn");
+    const helpBtn = document.getElementById("helpBtn");
+
 
   function createRow(requirementText) {
     const tr = document.createElement("tr");
@@ -487,11 +493,18 @@
   calcBtn.addEventListener("click", calculateAndSort);
   resetBtn.addEventListener("click", populateSampleData);
 
+  
+
   viewOutcomeBtn.addEventListener("click", () => {
     // Navigate to outcome page
     window.location.href = "outcome.html";
   });
 
+  helpBtn.addEventListener("click", () => {
+    window.open("explanation.html", "_blank");
+  });
+
+  
   // Initial load
   populateSampleData();
 </script>
