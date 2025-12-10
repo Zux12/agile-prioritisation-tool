@@ -262,13 +262,15 @@
       </table>
     </div>
 
-    <div style="margin-top:1rem; display:flex; flex-wrap:wrap; gap:0.5rem;">
+       <div style="margin-top:1rem; display:flex; flex-wrap:wrap; gap:0.5rem;">
       <button id="calcBtn">⚙️ Calculate &amp; Sort Priorities</button>
+      <button id="viewOutcomeBtn" class="secondary" disabled>📊 View Project Outcome</button>
     </div>
 
     <p class="results-note" id="resultsNote">
       Tip: Use this page in your research demo to show how user input changes the prioritisation order.
     </p>
+
   </section>
 </main>
 
@@ -295,6 +297,7 @@
   const calcBtn = document.getElementById("calcBtn");
   const resetBtn = document.getElementById("resetBtn");
   const resultsNote = document.getElementById("resultsNote");
+  const viewOutcomeBtn = document.getElementById("viewOutcomeBtn");
 
   function createRow(requirementText) {
     const tr = document.createElement("tr");
@@ -371,10 +374,17 @@
     });
     resultsNote.textContent =
       "Sample requirements loaded. Adjust ratings, then click “Calculate & Sort Priorities”.";
+    // Disable outcome button until next calculation
+    viewOutcomeBtn.disabled = true;
   }
 
   function calculateAndSort() {
     const rows = Array.from(tableBody.querySelectorAll("tr"));
+
+    if (rows.length === 0) {
+      alert("Please add at least one requirement before calculating.");
+      return;
+    }
 
     rows.forEach(row => {
       row.classList.remove("highlight");
@@ -406,6 +416,60 @@
 
     resultsNote.textContent =
       "Backlog sorted by computed priority score. Top 3 items are highlighted as recommended for next sprint.";
+
+    // After sorting, compute summary metrics for outcome page
+    computeAndStoreOutcomeMetrics(rows);
+
+    // Enable the "View Project Outcome" button
+    viewOutcomeBtn.disabled = false;
+  }
+
+  function computeAndStoreOutcomeMetrics(sortedRows) {
+    // Use top N requirements for outcome summary
+    const topN = Math.min(5, sortedRows.length);
+    const topRows = sortedRows.slice(0, topN);
+
+    let totalImp = 0;
+    let totalVal = 0;
+    let totalEff = 0;
+    let mustCount = 0;
+
+    topRows.forEach(row => {
+      const inputs = row.querySelectorAll("input[type='number']");
+      const imp = parseFloat(inputs[0].value) || 0;
+      const val = parseFloat(inputs[1].value) || 0;
+      const eff = parseFloat(inputs[2].value) || 0;
+      const mosSel = row.querySelector("select").value;
+
+      totalImp += imp;
+      totalVal += val;
+      totalEff += eff;
+      if (mosSel === "Must") {
+        mustCount += 1;
+      }
+    });
+
+    const avgImp = totalImp / topN;
+    const avgVal = totalVal / topN;
+    const avgEff = totalEff / topN;
+
+    // Convert to 0–100 scores
+    const userValueAlignment = ((avgImp + avgVal) / 10) * 100;  // both 1–5, sum max 10
+    const deliveryEfficiency = ((6 - avgEff) / 5) * 100;        // lower effort = better
+    const criticalityCoverage = (mustCount / topN) * 100;       // % of Must in top N
+
+    // Clamp between 0 and 100
+    const clamp = v => Math.max(0, Math.min(100, v));
+
+    const uvaScore = clamp(userValueAlignment);
+    const deScore = clamp(deliveryEfficiency);
+    const ccScore = clamp(criticalityCoverage);
+
+    // Store in localStorage for outcome.html to use
+    localStorage.setItem("qp_userValueAlignment", uvaScore.toFixed(1));
+    localStorage.setItem("qp_deliveryEfficiency", deScore.toFixed(1));
+    localStorage.setItem("qp_criticalityCoverage", ccScore.toFixed(1));
+    localStorage.setItem("qp_lastUpdated", new Date().toISOString());
   }
 
   addRequirementBtn.addEventListener("click", () => {
@@ -417,14 +481,21 @@
     tableBody.appendChild(createRow(text));
     newRequirementInput.value = "";
     resultsNote.textContent = "New requirement added. Don’t forget to recalculate priorities.";
+    viewOutcomeBtn.disabled = true;
   });
 
   calcBtn.addEventListener("click", calculateAndSort);
   resetBtn.addEventListener("click", populateSampleData);
 
+  viewOutcomeBtn.addEventListener("click", () => {
+    // Navigate to outcome page
+    window.location.href = "outcome.html";
+  });
+
   // Initial load
   populateSampleData();
 </script>
+
 
   <footer style="margin-top:2rem; text-align:center; padding:1rem 0; color:#555; font-size:0.85rem;">
   © 2025-2026 Fang Yu — Requirement Prioritisation Research Prototype
