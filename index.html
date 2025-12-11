@@ -125,6 +125,22 @@
       box-shadow: none;
     }
 
+    .trash-btn {
+      background: none;
+      box-shadow: none;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 1rem;
+      color: #c0392b;
+    }
+
+    .trash-btn:hover {
+      background: #ffecec;
+      transform: none;
+      box-shadow: none;
+    }
+
+    
     button:hover {
       transform: translateY(-1px);
       box-shadow: 0 6px 16px rgba(63, 142, 252, 0.35);
@@ -250,7 +266,7 @@
 
     <div style="max-height: 380px; overflow:auto; margin-top:0.8rem;">
       <table id="reqTable">
-        <thead>
+               <thead>
         <tr>
           <th style="width: 30%;">Requirement</th>
           <th style="width: 10%;">Importance<br>(1–5)</th>
@@ -258,8 +274,10 @@
           <th style="width: 10%;">Effort<br>(1–5)</th>
           <th style="width: 14%;">MoSCoW</th>
           <th style="width: 10%;">Score</th>
+          <th style="width: 6%;">Remove</th>
         </tr>
         </thead>
+
         <tbody>
         <!-- Rows will be populated by JS -->
         </tbody>
@@ -363,14 +381,38 @@
     tdScore.className = "score";
     tdScore.textContent = "-";
 
+    // Remove button cell
+    const tdRemove = document.createElement("td");
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.textContent = "🗑";
+    removeBtn.className = "trash-btn";
+
+    removeBtn.addEventListener("click", () => {
+      const ok = confirm("Are you sure you want to remove this requirement?");
+      if (!ok) return;
+
+      tr.remove();
+      resultsNote.textContent =
+        "Requirement removed. Please recalculate priorities to update scores and project outcome.";
+      // Disable outcome button until recalculation
+      if (viewOutcomeBtn) {
+        viewOutcomeBtn.disabled = true;
+      }
+    });
+
+    tdRemove.appendChild(removeBtn);
+
     tr.appendChild(tdReq);
     tr.appendChild(tdImp);
     tr.appendChild(tdVal);
     tr.appendChild(tdEff);
     tr.appendChild(tdMos);
     tr.appendChild(tdScore);
+    tr.appendChild(tdRemove);
 
     return tr;
+
   }
 
   function populateSampleData() {
